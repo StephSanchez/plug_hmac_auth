@@ -1,6 +1,6 @@
 # HMAC Authentication Plug
 
-![Elixir CI](https://github.com/flipay/plug_hmac_auth/workflows/Elixir%20CI/badge.svg)
+![Elixir CI](https://github.com/StephSanchez/plug_hmac_auth/workflows/Elixir%20CI/badge.svg)
 [![Hex.pm](https://img.shields.io/hexpm/v/plug_hmac_auth.svg)](https://hex.pm/packages/plug_hmac_auth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 
