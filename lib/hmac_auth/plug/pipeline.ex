@@ -47,9 +47,13 @@ if Code.ensure_loaded?(Plug) do
           pipeline_opts = [
             key_access_id: config(opts, :key_access_id),
             key_signature: config(opts, :key_signature),
+            key_nonce: config(opts, :key_nonce),
+            key_timestamp: config(opts, :key_timestamp),
             hmac_hash_algo: config(opts, :hmac_hash_algo, :sha512),
             secret_handler: config(opts, :secret_handler),
-            error_handler: config(opts, :error_handler)
+            error_handler: config(opts, :error_handler),
+            nonce_handler: config(opts, :nonce_handler),
+            timestamp_handler: config(opts, :timestamp_handler),
           ]
 
           Pipeline.call(conn, pipeline_opts)

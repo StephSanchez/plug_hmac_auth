@@ -46,23 +46,32 @@ In the router module of your web site, define a new pipeline to enable the plug 
 
 ```elixir
 pipeline :plug_hmac_auth do
-  plug(PlugHmacAuth,
-    key_access_id: "x-access-id",
-    key_signature: "x-access-signature",
-    hmac_hash_algo: :sha512,
-    secret_handler: PlugHmacAuthExample.Handlers.SecretHandler,
-    error_handler: PlugHmacAuthExampleWeb.ErrorHandler
-  )
-end
+    plug(PlugHmacAuth,
+      key_access_id: "X-Authorization-Id",
+      key_signature: "Authorization",
+      key_nonce: "X-Authorization-Nonce",
+      key_timestamp: "X-Authorization-Timestamp",
+      hmac_hash_algo: :sha512,
+      secret_handler: SampleApp.Handlers.SecretHandler,
+      error_handler: SampleApp.Handlers.AuthErrorHandlers,
+      nonce_handler: SampleApp.Handlers.NonceHandler,
+      timestamp_handler: SampleApp.Handlers.TimestampHandler
+    )
+  end
 ```
 
 Module `PlugHmacAuth` needs these options:
 
 - `key_access_id`: The key of `access_id` in the HTTP request header.
 - `key_signature`: The key of `signature` in the HTTP request header.
+- `key_nonce`: The key of `nonce` in the HTTP request header. The nonce global attribute is a content attribute defining a cryptographic nonce ("number used once") which can be used by Content Security Policy to determine whether or not a given fetch will be allowed to proceed for a given element.
+- `key_timestamps`: The Key `timestamps` in the HTTP request header. The timestamp global attribute  includes information about the time when the HTTP request was sent. It helps in managing cache mechanisms, handling resource updates, and ensuring synchronization between the client and server.
 - `hmac_hash_algo`: The algorithm of HMAC.
 - `secret_handler`: Secret handler is the module to get the `secret` by given `access_id`.
 - `error_handler`: Error handler is the module to handle the unauthorized request.
+- `nonce_handler` : Nonce handler to determine unicity of a request
+- `timestamp_handler` : Timestamps handler to determine the validity of a request 
+
 
 ### HMAC hash algorithm
 
@@ -75,6 +84,14 @@ We need to implement the callback function of `get_secret_key/1` to let authenti
 ### Error Handler
 
 We need to implement the callback function of `auth_error/2` to let the authenticator know how to handle the unauthorized request.
+
+### Nonce handler
+
+We need to implement the callback function of `validate_nonce_key/1` to let the authenticator know how to handle the request unicity. We need to implement the callback function of `store_nonce_key` to let the authenticator know how to store the nonce. The nonce is store only if the payload verification match.
+
+### Timestamp Handler
+
+We need to implement the callback function of `validate_timestamp_key/1` to let the authenticator know how to handle the request validity. the timestamp is a Unix Timestamp.
 
 ## Documentation
 

@@ -1,7 +1,7 @@
 defmodule PlugHmacAuth.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.1.6"
   @name "PlugHmacAuth"
   @description "A Plug adapter for HMAC authentication"
 
@@ -9,7 +9,7 @@ defmodule PlugHmacAuth.MixProject do
     [
       app: :plug_hmac_auth,
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.15",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -22,7 +22,7 @@ defmodule PlugHmacAuth.MixProject do
         ],
         main: "PlugHmacAuth",
         source_ref: "v#{@version}",
-        source_url: "https://github.com/flipay/plug_hmac_auth"
+        source_url: "https://github.com/StephSanchez/plug_hmac_auth"
       ]
     ]
   end
@@ -44,8 +44,8 @@ defmodule PlugHmacAuth.MixProject do
   defp package do
     %{
       licenses: ["MIT"],
-      maintainers: ["Neo Ho"],
-      links: %{"GitHub" => "https://github.com/flipay/plug_hmac_auth"}
+      maintainers: ["StephSanch"],
+      links: %{"GitHub" => "https://github.com/StephSanchez/plug_hmac_auth"}
     }
   end
 end
