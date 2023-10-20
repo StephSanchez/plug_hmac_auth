@@ -22,7 +22,81 @@ end
 
 ## Usage
 
-Here we demonstrate the usage by [this example](https://github.com/flipay/plug_hmac_auth_example). Replace the `PlugHmacAuthExample` by the name of your own web site.
+### HTTP GET SAMPLE (readable request)
+This sample is provided using Javascript
+```js
+const uuid = require('uuid');
+const cryptoJS = require("crypto-js");
+const moment = require("moment");
+
+const nonce = uuid.v4();
+const client_id = 'USE YOUR CLIENT ID';
+const host = "localhsot";
+const method = "GET";
+const epoch = moment().unix();
+const path = request.url.getPath();
+// payload format
+// host: ${host}; method: ${method}; request_path /sample/sample/id; query_string ; nonce: holaf6; timestamp: 1693860698
+var payload = `host: ${host}; method: ${method}; request_path: ${path}; query_string ; nonce: ${nonce}; timestamp: ${epoch}`;
+console.log(payload);
+
+// Accordind to your configuration :hmac_hash_algo
+var authorize = cryptoJS.HmacSHA512(payload, 'USE YOUR PRIVATE KEY').toString(cryptoJS.enc.Base64);
+
+headers.add([{
+    key: "Authorization",
+    value: authorize
+},{
+    key: "X-Authorization-Id",
+    value: client_id
+},{
+    key: "X-Authorization-Nonce",
+    value: nonce
+},{
+    key: "X-Authorization-Timestamp",
+    value: epoch
+}]);
+
+```
+
+### HTTP POST SAMPLE (writable request)
+this sample is provided usins javascript
+
+```js
+const uuid = require('uuid');
+const cryptoJS = require("crypto-js");
+const moment = require("moment");
+
+const nonce = uuid.v4();
+const client_id = 'USE YOUR CLIENT ID';
+const host = "localhost"
+const method = "POST";
+
+const epoch = moment().unix();
+const body_hash = CryptoJS.MD5(request.body.toString()).toString()
+const path = request.url.getPath();
+// payload format
+// host: localhost; method: POST; request_path: /sample/sample; body_hash: f6ec8fd8d77bf5e19f6a28a37353d6ef; nonce: holaf7; timestamp: 1694248700
+var payload = `host: ${host}; method: ${method}; request_path: ${path}; body_hash: ${body_hash}; nonce: ${nonce}; timestamp: ${epoch}`;
+
+// Accordind to your configuration :hmac_hash_algo
+var authorize = cryptoJS.HmacSHA512(payload, 'USE YOUR PRIVATE KEY').toString(cryptoJS.enc.Base64);
+
+headers.add([{
+    key: "Authorization",
+    value: authorize
+},{
+    key: "X-Authorization-Id",
+    value: client_id
+},{
+    key: "X-Authorization-Nonce",
+    value: nonce
+},{
+    key: "X-Authorization-Timestamp",
+    value: epoch
+}]);
+
+```
 
 ### PlugHmacAuthExampleWeb.Endpoint
 
