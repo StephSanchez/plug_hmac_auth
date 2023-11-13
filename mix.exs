@@ -1,7 +1,7 @@
 defmodule PlugHmacAuth.MixProject do
   use Mix.Project
 
-  @version "0.1.8"
+  @version "0.1.9"
   @name "PlugHmacAuth"
   @description "A Plug adapter for HMAC authentication"
 

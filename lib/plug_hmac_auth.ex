@@ -63,8 +63,8 @@ defmodule PlugHmacAuth do
          :ok <- timestamp_handler.validate_timestamp_key(request_timestamp),
          :ok <- verify_payload(conn, secret_key, access_signature,access_nonce, request_timestamp, hmac_hash_algo) do
           nonce_handler.store_nonce_key(access_nonce)
-          request_context_handler.assign_context(conn,access_key )
           conn
+          |> request_context_handler.assign_context(access_key)
           |> put_resp_header("x-access-nonce", access_nonce)
     else
       {:error, code} ->
