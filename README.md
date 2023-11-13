@@ -130,6 +130,7 @@ pipeline :plug_hmac_auth do
       error_handler: SampleApp.Handlers.AuthErrorHandlers,
       nonce_handler: SampleApp.Handlers.NonceHandler,
       timestamp_handler: SampleApp.Handlers.TimestampHandler
+      request_context_handler: SampleApp.Handlers.RequestContextHandler
     )
   end
 ```
@@ -144,7 +145,8 @@ Module `PlugHmacAuth` needs these options:
 - `secret_handler`: Secret handler is the module to get the `secret` by given `access_id`.
 - `error_handler`: Error handler is the module to handle the unauthorized request.
 - `nonce_handler` : Nonce handler to determine unicity of a request
-- `timestamp_handler` : Timestamps handler to determine the validity of a request 
+- `timestamp_handler` : Timestamps handler to determine the validity of a request
+- `request_context_handler` : Request Context handler to offer the possiblity to add a user context within the request context.
 
 
 ### HMAC hash algorithm
@@ -166,6 +168,12 @@ We need to implement the callback function of `validate_nonce_key/1` to let the 
 ### Timestamp Handler
 
 We need to implement the callback function of `validate_timestamp_key/1` to let the authenticator know how to handle the request validity. the timestamp is a Unix Timestamp.
+
+### Request Context handler
+
+We need to implement the callback function of `assign_context/2` to let the authenticator know how to handle the request contexte. the first parameter is the `%Plug.Conn{}`. The second one is the `access_id` of the request.
+#### Nota
+The authenticator add directly the `access_id` in the connection assigns with key `x_client_id`
 
 ## Documentation
 

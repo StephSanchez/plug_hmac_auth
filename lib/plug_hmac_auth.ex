@@ -30,14 +30,11 @@ defmodule PlugHmacAuth do
 
   @spec init(opts :: Keyword.t()) :: Keyword.t()
   def init(opts) do
-    Logger.debug("Init PlugHmacAuth")
     opts
   end
 
   @spec call(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def call(conn, opts) do
-    Logger.debug("Call - #{inspect opts}")
-    #Logger.debug("Conn #{inspect conn}")
 
     key_access_id = Keyword.get(opts, :key_access_id, "no-key-access-id") |> String.downcase()
     key_signature = Keyword.get(opts, :key_signature, "no-key-signature") |> String.downcase()
@@ -48,6 +45,7 @@ defmodule PlugHmacAuth do
     error_handler = Keyword.get(opts, :error_handler, :no_error_handler)
     nonce_handler = Keyword.get(opts, :nonce_handler, :no_nonce_handler)
     timestamp_handler = Keyword.get(opts, :timestamp_handler, :no_timestamp_handler)
+    request_context_handler = Keyword.get(opts, :request_context_handler, :no_request_context_handler)
 
     Logger.debug("key_access_id : #{key_access_id}")
     Logger.debug("key_signature : #{key_signature}")
@@ -65,7 +63,10 @@ defmodule PlugHmacAuth do
          :ok <- timestamp_handler.validate_timestamp_key(request_timestamp),
          :ok <- verify_payload(conn, secret_key, access_signature,access_nonce, request_timestamp, hmac_hash_algo) do
           nonce_handler.store_nonce_key(access_nonce)
-          conn |> put_resp_header("x-access-nonce", access_nonce)
+          request_context_handler.assign_context(conn,access_key )
+          conn
+          |> assign("x_client_id", access_key)
+          |> put_resp_header("x-access-nonce", access_nonce)
     else
       {:error, code} ->
         Logger.error("Invalid code : #{code}")
