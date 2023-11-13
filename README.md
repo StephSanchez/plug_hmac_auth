@@ -172,8 +172,7 @@ We need to implement the callback function of `validate_timestamp_key/1` to let 
 ### Request Context handler
 
 We need to implement the callback function of `assign_context/2` to let the authenticator know how to handle the request contexte. the first parameter is the `%Plug.Conn{}`. The second one is the `access_id` of the request.
-#### Nota
-The authenticator add directly the `access_id` in the connection assigns with key `x_client_id`
+
 
 ## Documentation
 

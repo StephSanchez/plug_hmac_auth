@@ -65,7 +65,6 @@ defmodule PlugHmacAuth do
           nonce_handler.store_nonce_key(access_nonce)
           request_context_handler.assign_context(conn,access_key )
           conn
-          |> assign("x_client_id", access_key)
           |> put_resp_header("x-access-nonce", access_nonce)
     else
       {:error, code} ->
