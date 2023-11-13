@@ -1,7 +1,7 @@
 defmodule PlugHmacAuth.MixProject do
   use Mix.Project
 
-  @version "0.1.6"
+  @version "0.1.7"
   @name "PlugHmacAuth"
   @description "A Plug adapter for HMAC authentication"
 
@@ -35,7 +35,7 @@ defmodule PlugHmacAuth.MixProject do
 
   defp deps do
     [
-      {:plug, "~> 1.10"},
+      {:plug, "~> 1.15"},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:ex_doc, "~> 0.22.0", only: :dev, runtime: false}
     ]
