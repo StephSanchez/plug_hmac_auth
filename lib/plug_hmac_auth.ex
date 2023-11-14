@@ -45,7 +45,7 @@ defmodule PlugHmacAuth do
     error_handler = Keyword.get(opts, :error_handler, :no_error_handler)
     nonce_handler = Keyword.get(opts, :nonce_handler, :no_nonce_handler)
     timestamp_handler = Keyword.get(opts, :timestamp_handler, :no_timestamp_handler)
-    request_context_handler = Keyword.get(opts, :request_context_handler, :no_request_context_handler)
+    request_context_handler = Keyword.get(opts, :request_context_handler, PlugHmacAuth.DefaultRequestContextHandler)
 
     Logger.debug("key_access_id : #{key_access_id}")
     Logger.debug("key_signature : #{key_signature}")

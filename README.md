@@ -173,6 +173,8 @@ We need to implement the callback function of `validate_timestamp_key/1` to let 
 
 We need to implement the callback function of `assign_context/2` to let the authenticator know how to handle the request contexte. the first parameter is the `%Plug.Conn{}`. The second one is the `access_id` of the request.
 
+#### Nota:
+If you do not specify a custom handler, the system defaults to using `PlugHmacAuth.DefaultRequestContextHandler`, which intercepts the pipeline and adds the client access key to the `x_client_id` tag. 
 
 ## Documentation
 

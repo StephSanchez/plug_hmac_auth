@@ -1,7 +1,5 @@
 if Code.ensure_loaded?(Plug) do
   defmodule HmacAuth.Plug.Pipeline do
-    import Plug.Conn
-
     defmacro __using__(opts \\ []) do
       alias HmacAuth.Plug
       alias HmacAuth.Plug.Pipeline
