@@ -2,11 +2,10 @@ defmodule PlugHmacAuth do
   @moduledoc """
   `PlugHmacAuth` provides a `Plug` for `HMAC authentication`.
   """
-  require Logger
 
   @behaviour Plug
   import Plug.Conn
-
+  alias PlugHmacAuth.Util
   @type opts :: [
           key_access_id: String.t(),
           key_usage: String.t(),
@@ -52,12 +51,12 @@ defmodule PlugHmacAuth do
     timestamp_handler = Keyword.get(opts, :timestamp_handler, :no_timestamp_handler)
     request_context_handler = Keyword.get(opts, :request_context_handler, PlugHmacAuth.DefaultRequestContextHandler)
 
-    Logger.debug("key_access_id : #{key_access_id}")
-    Logger.debug("key_usage : #{key_usage}")
-    Logger.debug("key_signature : #{key_signature}")
-    Logger.debug("key_nonce : #{key_nonce}")
-    Logger.debug("key_timestamp : #{key_timestamp}")
-    Logger.debug("hmac_hash_algo : #{hmac_hash_algo}")
+    opts |> Util.log("key_access_id : #{key_access_id}")
+    opts |> Util.log("key_usage : #{key_usage}")
+    opts |> Util.log("key_signature : #{key_signature}")
+    opts |> Util.log("key_nonce : #{key_nonce}")
+    opts |> Util.log("key_timestamp : #{key_timestamp}")
+    opts |> Util.log("hmac_hash_algo : #{hmac_hash_algo}")
 
     with {:ok, access_key} <- fetch_token_from_header(conn, key_access_id),
          {:ok, access_signature} <- fetch_token_from_header(conn, key_signature),
@@ -67,20 +66,21 @@ defmodule PlugHmacAuth do
          {request_timestamp, _base} <- Integer.parse(access_timestamp),
          :ok <- nonce_handler.validate_nonce_key(access_nonce),
          :ok <- timestamp_handler.validate_timestamp_key(request_timestamp),
-         :ok <- verify_payload(conn, secret_key, access_signature,access_nonce, request_timestamp, hmac_hash_algo) do
+         :ok <- verify_payload(conn,opts, secret_key, access_signature,access_nonce, request_timestamp, hmac_hash_algo) do
           nonce_handler.store_nonce_key(access_nonce)
           conn
           |> request_context_handler.assign_context(access_key)
           |> put_resp_header("x-access-nonce", access_nonce)
     else
       {:error, code} ->
-        Logger.error("Invalid code : #{code}")
+        opts |> Util.log("Invalid code : #{code}")
         conn |> error_handler.auth_error(code) |> halt()
     end
   end
 
   @spec verify_payload(
           Plug.Conn.t(),
+          Keyword.t(),
           String.t(),
           String.t(),
           String.t(),
@@ -97,14 +97,14 @@ defmodule PlugHmacAuth do
           | :sha3_512
           | :sha512
         ) :: :ok | {:error, :invalid_signature}
-  def verify_payload(conn, secret_key, access_signature, access_nonce, access_timestamps, hmac_hash_algo)
+  def verify_payload(conn, opts, secret_key, access_signature, access_nonce, access_timestamps, hmac_hash_algo)
 
-  def verify_payload(conn, secret_key, access_signature, access_nonce, access_timestamps, hmac_hash_algo) do
-    payload=conn |> get_payload() |> concat_payload("nonce", access_nonce)|> concat_payload("timestamp", access_timestamps)
+  def verify_payload(conn, opts, secret_key, access_signature, access_nonce, access_timestamps, hmac_hash_algo) do
+    payload=conn |> get_payload(opts) |> concat_payload("nonce", access_nonce)|> concat_payload("timestamp", access_timestamps)
     verif = payload |> gen_signature(secret_key, hmac_hash_algo)
-    Logger.debug(["access_signature:", inspect(access_signature)])
-    Logger.debug(["verif           : ",inspect(verif)])
-    Logger.debug(["payload         : ",inspect(payload)])
+    opts |> Util.log(["access_signature:", inspect(access_signature)])
+    opts |> Util.log(["verif           : ",inspect(verif)])
+    opts |> Util.log(["payload         : ",inspect(payload)])
 
     if verif == access_signature do
       :ok
@@ -113,17 +113,17 @@ defmodule PlugHmacAuth do
     end
   end
 
-  @spec get_payload(Plug.Conn.t()) :: String.t()
-  def get_payload(%Plug.Conn{method: "GET", query_string: query_string, host: host, request_path: request_path}) do
+  @spec get_payload(Plug.Conn.t(), Keyword.t()) :: String.t()
+  def get_payload(%Plug.Conn{method: "GET", query_string: query_string, host: host, request_path: request_path}, opts) do
     expected =  "host: #{host}; method: GET; request_path: #{request_path}; query_string #{Base.encode64(query_string)}"
-    Logger.debug("Expected payload : #{expected}")
+    opts |> Util.log("Expected payload : #{expected}")
     expected
   end
-  def get_payload(%Plug.Conn{method: method, host: host, request_path: request_path} = conn) do
+  def get_payload(%Plug.Conn{method: method, host: host, request_path: request_path} = conn, opts) do
     body_hash = conn.private[:md5sum]
-    Logger.debug("Final resquest body md5sum : #{body_hash}")
+    opts |> Util.log("Final resquest body md5sum : #{body_hash}")
     expected = "host: #{host}; method: #{method}; request_path: #{request_path}; body_hash: #{body_hash}"
-    Logger.debug("Expected payload : #{expected}")
+    opts |> Util.log("Expected payload : #{expected}")
     expected
   end
 

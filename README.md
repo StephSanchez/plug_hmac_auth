@@ -121,6 +121,7 @@ In the router module of your web site, define a new pipeline to enable the plug 
 ```elixir
 pipeline :plug_hmac_auth do
     plug(PlugHmacAuth,
+      log: true,
       key_access_id: "X-Authorization-Id",
       key_signature: "Authorization",
       key_nonce: "X-Authorization-Nonce",
@@ -136,7 +137,7 @@ pipeline :plug_hmac_auth do
 ```
 
 Module `PlugHmacAuth` needs these options:
-
+- `log`: [true| false] to enable log in module, default value is false
 - `key_access_id`: The key of `access_id` in the HTTP request header.
 - `key_signature`: The key of `signature` in the HTTP request header.
 - `key_nonce`: The key of `nonce` in the HTTP request header. The nonce global attribute is a content attribute defining a cryptographic nonce ("number used once") which can be used by Content Security Policy to determine whether or not a given fetch will be allowed to proceed for a given element.

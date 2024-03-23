@@ -53,6 +53,7 @@ if Code.ensure_loaded?(Plug) do
             nonce_handler: config(opts, :nonce_handler),
             timestamp_handler: config(opts, :timestamp_handler),
             request_context_handler: config(opts, :request_context_handler),
+            log: config(opts, :log)
           ]
 
           Pipeline.call(conn, pipeline_opts)
