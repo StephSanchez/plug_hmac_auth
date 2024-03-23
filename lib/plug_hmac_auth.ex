@@ -9,6 +9,7 @@ defmodule PlugHmacAuth do
 
   @type opts :: [
           key_access_id: String.t(),
+          key_usage: String.t(),
           key_signature: String.t(),
           key_nonce: String.t(),
           key_timestamp: integer(),
@@ -25,7 +26,10 @@ defmodule PlugHmacAuth do
             | :sha3_512
             | :sha512,
           secret_handler: module(),
-          error_handler: module()
+          error_handler: module(),
+          nonce_handler: module(),
+          timestamp_handler: module(),
+          request_context_handler: module()
         ]
 
   @spec init(opts :: Keyword.t()) :: Keyword.t()
@@ -37,6 +41,7 @@ defmodule PlugHmacAuth do
   def call(conn, opts) do
 
     key_access_id = Keyword.get(opts, :key_access_id, "no-key-access-id") |> String.downcase()
+    key_usage = Keyword.get(opts, :key_usage, "no-key-usage") |> String.downcase()
     key_signature = Keyword.get(opts, :key_signature, "no-key-signature") |> String.downcase()
     key_nonce = Keyword.get(opts, :key_nonce, "no-key-nonce") |> String.downcase()
     key_timestamp = Keyword.get(opts, :key_timestamp, "no-key-timestamp") |> String.downcase()
@@ -48,6 +53,7 @@ defmodule PlugHmacAuth do
     request_context_handler = Keyword.get(opts, :request_context_handler, PlugHmacAuth.DefaultRequestContextHandler)
 
     Logger.debug("key_access_id : #{key_access_id}")
+    Logger.debug("key_usage : #{key_usage}")
     Logger.debug("key_signature : #{key_signature}")
     Logger.debug("key_nonce : #{key_nonce}")
     Logger.debug("key_timestamp : #{key_timestamp}")
@@ -57,7 +63,7 @@ defmodule PlugHmacAuth do
          {:ok, access_signature} <- fetch_token_from_header(conn, key_signature),
          {:ok, access_nonce} <- fetch_token_from_header(conn, key_nonce),
          {:ok, access_timestamp} <- fetch_token_from_header(conn, key_timestamp),
-         {:ok, secret_key} <- secret_handler.get_secret_key(access_key),
+         {:ok, secret_key} <- secret_handler.get_secret_key(access_key, key_usage),
          {request_timestamp, _base} <- Integer.parse(access_timestamp),
          :ok <- nonce_handler.validate_nonce_key(access_nonce),
          :ok <- timestamp_handler.validate_timestamp_key(request_timestamp),
@@ -134,8 +140,7 @@ defmodule PlugHmacAuth do
   @doc """
   Returns the first token from http request header by specific key.
   """
-  @spec fetch_token_from_header(Plug.Conn.t(), binary()) ::
-          {:error, :invalid_key} | {:ok, binary()}
+  @spec fetch_token_from_header(Plug.Conn.t(), binary()) :: {:error, :invalid_key} | {:ok, binary()}
   def fetch_token_from_header(conn, key)
 
   def fetch_token_from_header(conn, key) when is_binary(key) do
